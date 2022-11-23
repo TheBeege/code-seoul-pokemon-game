@@ -29,32 +29,58 @@ let lastKey = '';
 
 let characterSpeed = 5;
 
-const playerImage = document.createElement('img');
-playerImage.src = 'playerDown.png'
+const playerDownImage = document.createElement('img');
+playerDownImage.src = 'assets/images/character/playerDown.png'
+const playerUpImage = document.createElement('img');
+playerUpImage.src = 'assets/images/character/playerUp.png'
+const playerLeftImage = document.createElement('img');
+playerLeftImage.src = 'assets/images/character/playerLeft.png'
+const playerRightImage = document.createElement('img');
+playerRightImage.src = 'assets/images/character/playerRight.png'
 
 const player = {
-    image: playerImage,
-    x: 0,
-    y: 0,
+    image: playerDownImage,
+    width: 192 / 4,
+    height: 68,
+    dx: (canvas.width / 2) - (48 / 2),
+    dy: (canvas.height / 2) - (68 / 2),
 };
 
 function handleInput() {
     if (keys.up && lastKey === 'up') {
         background.dy += characterSpeed;
+        player.image = playerUpImage;
     } else if (keys.down && lastKey === 'down') {
         background.dy -= characterSpeed;
+        player.image = playerDownImage;
     } else if (keys.left && lastKey === 'left') {
         background.dx += characterSpeed;
+        player.image = playerLeftImage;
     } else if (keys.right && lastKey === 'right') {
         background.dx -= characterSpeed;
+        player.image = playerRightImage;
     }
 }
 
 function animate() {
     // attempts to run at 60fps
     window.requestAnimationFrame(animate);
-    context.drawImage(background.image, background.dx, background.dy);
-    context.drawImage(player.image, player.x, player.y);
+    context.drawImage(
+        background.image,
+        background.dx,
+        background.dy
+    );
+    context.drawImage(
+        player.image,
+        0,
+        0,
+        player.width,
+        player.height,
+        player.dx,
+        player.dy,
+        player.width,
+        player.height
+    );
     handleInput();
 }
 
