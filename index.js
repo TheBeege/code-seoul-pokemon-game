@@ -2,9 +2,12 @@
 // Let's have fun building a game together!
 // Gotta Catch 'Em All!
 
-let characterSpeed = 5;
+// TODO: rewrite. encapsulate. deduplicate.
+
+let movementSpeed = 5;
 let mapWidth = 90;  // the width of the map in tiles
 const blockSize = 60;  // the size of each block (tile) on the map
+let collisionOpacity = 0.0;
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -18,7 +21,7 @@ backgroundImage.src = 'assets/images/map_elements/island_town_bg.png';
 const background = {
     image: backgroundImage,
     dx: -4022 + (canvas.width / 2),
-    dy: -2500 + (canvas.height / 2)
+    dy: -2555 + (canvas.height / 2),
 };
 
 const keys = {
@@ -58,20 +61,41 @@ const playerFrames = {
 function handleInput() {
     if (keys.up && lastKey === 'up') {
         player.animate = true;
-        background.dy += characterSpeed;
         player.image = playerUpImage;
+        if (!detectCollisions(0, movementSpeed)) {
+            background.dy += movementSpeed;
+            // TODO: separate speed from velocity, apply velocity to everything
+            boundaries.forEach(boundary => {
+                boundary.y += movementSpeed;
+            });
+        }
     } else if (keys.down && lastKey === 'down') {
         player.animate = true;
-        background.dy -= characterSpeed;
         player.image = playerDownImage;
+        if (!detectCollisions(0, -movementSpeed)) {
+            background.dy -= movementSpeed;
+            boundaries.forEach(boundary => {
+                boundary.y -= movementSpeed;
+            });
+        }
     } else if (keys.left && lastKey === 'left') {
         player.animate = true;
-        background.dx += characterSpeed;
         player.image = playerLeftImage;
+        if (!detectCollisions(movementSpeed, 0)) {
+            background.dx += movementSpeed;
+            boundaries.forEach(boundary => {
+                boundary.x += movementSpeed;
+            });
+        }
     } else if (keys.right && lastKey === 'right') {
         player.animate = true;
-        background.dx -= characterSpeed;
         player.image = playerRightImage;
+        if (!detectCollisions(-movementSpeed, 0)) {
+            background.dx -= movementSpeed;
+            boundaries.forEach(boundary => {
+                boundary.x -= movementSpeed;
+            });
+        }
     } else {
         player.animate = false;
     }
@@ -109,6 +133,39 @@ collisionsMap.forEach((row, i) => {
     });
 });
 
+function rectangularCollision({playerRect, colliderRect}) {
+    return (
+        playerRect.x + playerRect.width >= colliderRect.x &&  // player right side collision with left side of collider
+        playerRect.x <= colliderRect.x + colliderRect.width &&  // player left side collision with right side of collider
+        playerRect.y + playerRect.height >= colliderRect.y &&  // player bottom side collision with top side of collider
+        playerRect.y <= colliderRect.y + colliderRect.height  // player top side collision with bottom side of collider
+    )
+}
+
+function detectCollisions(futureX, futureY) {
+    let collision = false;
+    for (let boundary of boundaries) {
+        collision = rectangularCollision({
+            playerRect: {
+                x: player.dx + futureX,
+                y: player.dy + futureY,
+                width: player.width,
+                height: player.height,
+            },
+            colliderRect: {
+                x: boundary.x,
+                y: boundary.y,
+                width: blockSize,
+                height: blockSize,
+            },
+        });
+        if (collision) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function animate() {
     // attempts to run at 60fps
     window.requestAnimationFrame(animate);
@@ -132,6 +189,15 @@ function animate() {
     );
 
     // draw the collision objects onto the canvas
+    context.fillStyle = `rgba(255, 0, 0, ${collisionOpacity})`;
+    boundaries.forEach(boundary => {
+        context.fillRect(
+            boundary.x,
+            boundary.y,
+            blockSize,
+            blockSize,
+        );
+    });
 
     handleInput();
 }
