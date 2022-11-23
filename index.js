@@ -2,6 +2,9 @@
 // Let's have fun building a game together!
 // Gotta Catch 'Em All!
 
+let characterSpeed = 5;
+let mapWidth = 90;  // the width of the map in tiles
+const blockSize = 60;  // the size of each block (tile) on the map
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -26,8 +29,6 @@ const keys = {
 };
 
 let lastKey = '';
-
-let characterSpeed = 5;
 
 const playerDownImage = document.createElement('img');
 playerDownImage.src = 'assets/images/character/playerDown.png'
@@ -87,6 +88,27 @@ function handleInput() {
     }
 }
 
+// the array in collisions.js is a one-dimensional array
+// that is, it's just a list of numbers
+// here, we convert it to a 2d array to match the map
+const collisionsMap = [];
+for (let i = 0; i < collisions.length; i += mapWidth) {
+    collisionsMap.push(collisions.slice(i, mapWidth + i));
+}
+
+const boundaries = [];
+collisionsMap.forEach((row, i) => {
+    row.forEach((collisionValue, j) => {
+        // 1025 is our blocking value
+        if (collisionValue === 1025) {
+            boundaries.push({
+                x: j * blockSize + background.dx,
+                y: i * blockSize + background.dy,
+            });
+        }
+    });
+});
+
 function animate() {
     // attempts to run at 60fps
     window.requestAnimationFrame(animate);
@@ -95,6 +117,8 @@ function animate() {
         background.dx,
         background.dy
     );
+    // draw the player onto the canvas
+    // image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number
     context.drawImage(
         player.image,
         playerFrames.current * player.width,
@@ -106,6 +130,9 @@ function animate() {
         player.width,
         player.height
     );
+
+    // draw the collision objects onto the canvas
+
     handleInput();
 }
 
