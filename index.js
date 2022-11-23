@@ -51,6 +51,7 @@ const playerFrames = {
     current: 0,
     max: 4,
     elapsed: 0,
+    hold: 7,
 };
 
 function handleInput() {
@@ -76,10 +77,13 @@ function handleInput() {
 
     if (!player.animate) return;
 
-    if (playerFrames.current < playerFrames.max - 1) {
-        playerFrames.current++;
-    } else {
-        playerFrames.current = 0;
+    playerFrames.elapsed++;
+    if (playerFrames.elapsed % playerFrames.hold === 0) {
+        if (playerFrames.current < playerFrames.max - 1) {
+            playerFrames.current++;
+        } else {
+            playerFrames.current = 0;
+        }
     }
 }
 
