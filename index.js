@@ -44,21 +44,42 @@ const player = {
     height: 68,
     dx: (canvas.width / 2) - (48 / 2),
     dy: (canvas.height / 2) - (68 / 2),
+    animate: false,
+};
+
+const playerFrames = {
+    current: 0,
+    max: 4,
+    elapsed: 0,
 };
 
 function handleInput() {
     if (keys.up && lastKey === 'up') {
+        player.animate = true;
         background.dy += characterSpeed;
         player.image = playerUpImage;
     } else if (keys.down && lastKey === 'down') {
+        player.animate = true;
         background.dy -= characterSpeed;
         player.image = playerDownImage;
     } else if (keys.left && lastKey === 'left') {
+        player.animate = true;
         background.dx += characterSpeed;
         player.image = playerLeftImage;
     } else if (keys.right && lastKey === 'right') {
+        player.animate = true;
         background.dx -= characterSpeed;
         player.image = playerRightImage;
+    } else {
+        player.animate = false;
+    }
+
+    if (!player.animate) return;
+
+    if (playerFrames.current < playerFrames.max - 1) {
+        playerFrames.current++;
+    } else {
+        playerFrames.current = 0;
     }
 }
 
@@ -72,7 +93,7 @@ function animate() {
     );
     context.drawImage(
         player.image,
-        0,
+        playerFrames.current * player.width,
         0,
         player.width,
         player.height,
