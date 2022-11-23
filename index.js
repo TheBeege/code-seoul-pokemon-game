@@ -29,6 +29,15 @@ let lastKey = '';
 
 let characterSpeed = 5;
 
+const playerImage = document.createElement('img');
+playerImage.src = 'playerDown.png'
+
+const player = {
+    image: playerImage,
+    x: 0,
+    y: 0,
+};
+
 function handleInput() {
     if (keys.up && lastKey === 'up') {
         background.dy += characterSpeed;
@@ -45,6 +54,7 @@ function animate() {
     // attempts to run at 60fps
     window.requestAnimationFrame(animate);
     context.drawImage(background.image, background.dx, background.dy);
+    context.drawImage(player.image, player.x, player.y);
     handleInput();
 }
 
